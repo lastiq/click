@@ -62,15 +62,11 @@ class UsageError(ClickException):
         if file is None:
             file = get_text_stderr()
         color = None
-        hint = ""
-        if self.cmd is not None and self.cmd.get_help_option(self.ctx) is not None:
-            hint = "Try '{} {}' for help.\n".format(
-                self.ctx.command_path, self.ctx.help_option_names[0]
-            )
+        echo(f"Error: {self.format_message()}\n", file=file, color=color)
         if self.ctx is not None:
             color = self.ctx.color
-            echo("{}\n{}".format(self.ctx.get_usage(), hint), file=file, color=color)
-        echo("Error: {}".format(self.format_message()), file=file, color=color)
+            echo(f"{self.ctx.get_help()}", file=file, color=color)
+
 
 
 class BadParameter(UsageError):
