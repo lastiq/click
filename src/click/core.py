@@ -1308,7 +1308,9 @@ class MultiCommand(Command):
         # an option we want to kick off parsing again for arguments to
         # resolve things like --help which now should go to the main
         # place.
-        if cmd is None and not ctx.resilient_parsing:
+
+        # OR if command must be hidden
+        if cmd is None and not ctx.resilient_parsing or cmd.hidden:
             if split_opt(cmd_name)[0]:
                 self.parse_args(ctx, ctx.args)
             ctx.fail("No such command '{}'.".format(original_cmd_name))
