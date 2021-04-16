@@ -35,3 +35,6 @@ class TextWrapper(textwrap.TextWrapper):
                 indent = self.subsequent_indent
             rv.append(indent + line)
         return "\n".join(rv)
+
+    def fill(self, text):
+        return " ".join(self.wrap(text))
