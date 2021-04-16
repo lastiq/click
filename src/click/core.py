@@ -1191,6 +1191,8 @@ class MultiCommand(Command):
 
             commands.append((subcommand, cmd))
 
+        # allow for 3 times the default spacing
+        if len(commands):
             rows = []
             for subcommand, cmd in commands:
                 help = cmd.get_short_help_str()
