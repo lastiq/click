@@ -975,7 +975,7 @@ class Command(BaseCommand):
         self.format_help(ctx, formatter)
         return formatter.getvalue().rstrip("\n")
 
-    def get_short_help_str(self, limit=45):
+    def get_short_help_str(self, limit=110):
         """Gets short help for the command or makes it by shortening the
         long help string.
         """
@@ -1193,11 +1193,9 @@ class MultiCommand(Command):
 
         # allow for 3 times the default spacing
         if len(commands):
-            limit = formatter.width - 6 - max(len(cmd[0]) for cmd in commands)
-
             rows = []
             for subcommand, cmd in commands:
-                help = cmd.get_short_help_str(limit)
+                help = cmd.get_short_help_str()
                 rows.append((subcommand, help))
 
             if rows:

@@ -187,7 +187,7 @@ class HelpFormatter(object):
         )
         self.write("\n")
 
-    def write_dl(self, rows, col_max=30, col_spacing=2):
+    def write_dl(self, rows, col_max=50, col_spacing=2):
         """Writes a definition list into the buffer.  This is how options
         and commands are usually formatted.
 
@@ -214,7 +214,7 @@ class HelpFormatter(object):
                 self.write("\n")
                 self.write(" " * (first_col + self.current_indent))
 
-            text_width = max(self.width - first_col - 2, 10)
+            text_width = max(self.width - first_col - 2, 110)
             wrapped_text = wrap_text(second, text_width, preserve_paragraphs=True)
             lines = wrapped_text.splitlines()
 

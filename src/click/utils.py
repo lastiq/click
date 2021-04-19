@@ -55,7 +55,7 @@ def make_str(value):
     return text_type(value)
 
 
-def make_default_short_help(help, max_length=45):
+def make_default_short_help(help, max_length=110):
     """Return a condensed version of help string."""
     words = help.split()
     total_length = 0
