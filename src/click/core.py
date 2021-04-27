@@ -2,6 +2,7 @@ import errno
 import inspect
 import os
 import sys
+import json
 from contextlib import contextmanager
 from functools import update_wrapper
 from itertools import repeat
@@ -44,6 +45,7 @@ SUBCOMMANDS_METAVAR = "COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]..."
 DEPRECATED_HELP_NOTICE = " (DEPRECATED)"
 DEPRECATED_INVOKE_NOTICE = "DeprecationWarning: The command %(name)s is deprecated."
 
+USER_POLICY = {}
 
 def _maybe_show_deprecated_notice(cmd):
     if cmd.deprecated:
@@ -99,6 +101,42 @@ def _check_multicommand(base_command, cmd_name, cmd, register=False):
             base_command.name,
         )
     )
+
+
+def _check_user_policy(base_command, cmd_name):
+    """
+    Gets all allowed commands from user 'm3admin_policy.json' file.
+    If command is in file then show it in help and allow to run it.
+    """
+    if not USER_POLICY:
+        try:
+            conf_path = os.environ['SDCT_CONF']
+        except KeyError:
+            raise AssertionError('Environment variable SDCT_CONF is not set! '
+                                 'Please verify that you configured '
+                                 'framework correctly.')
+        file_path = os.path.join(
+            os.path.join(conf_path, 'm3admin_policy.json'))
+        if not os.path.exists(file_path):
+            raise AssertionError('Policy file is not found. Please contact '
+                                 'Maestro Support team for the assistance.')
+
+        with open(file_path) as file:
+            all_allowed_commands = json.load(file)
+            # create dict from commands in policy
+            for command in all_allowed_commands:
+                group = command.get('Group')
+                if group and group in USER_POLICY.keys():
+                    USER_POLICY[group].extend(command['Resources'])
+                else:
+                    USER_POLICY.update({group: command['Resources']})
+
+    if (base_command.name == 'm3admin' and cmd_name in USER_POLICY.keys()) \
+        or (USER_POLICY.get(base_command.name)
+            and cmd_name in USER_POLICY.get(base_command.name)):
+        return True
+
+    return False
 
 
 def batch(iterable, batch_size):
@@ -1347,8 +1385,9 @@ class Group(MultiCommand):
         name = name or cmd.name
         if name is None:
             raise TypeError("Command has no name.")
-        _check_multicommand(self, name, cmd, register=True)
-        self.commands[name] = cmd
+        if _check_user_policy(self, name):
+            _check_multicommand(self, name, cmd, register=True)
+            self.commands[name] = cmd
 
     def command(self, *args, **kwargs):
         """A shortcut decorator for declaring and attaching a command to
