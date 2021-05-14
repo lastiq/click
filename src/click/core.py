@@ -108,6 +108,7 @@ def _check_user_policy(base_command, cmd_name):
     Gets all allowed commands from user 'm3admin_policy.json' file.
     If command is in file then show it in help and allow to run it.
     """
+    global USER_POLICY
     if not USER_POLICY:
         try:
             conf_path = os.environ['SDCT_CONF']
@@ -1385,9 +1386,8 @@ class Group(MultiCommand):
         name = name or cmd.name
         if name is None:
             raise TypeError("Command has no name.")
-        if _check_user_policy(self, name):
-            _check_multicommand(self, name, cmd, register=True)
-            self.commands[name] = cmd
+        _check_multicommand(self, name, cmd, register=True)
+        self.commands[name] = cmd
 
     def command(self, *args, **kwargs):
         """A shortcut decorator for declaring and attaching a command to
